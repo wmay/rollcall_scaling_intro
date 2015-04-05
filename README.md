@@ -2,7 +2,7 @@
 
 Learn how to graph legislators on the political spectrum based on their rollcall votes, using NOMINATE and other programs developed by political scientists. April 20th, 2015, at 6pm at SUNY Albany, BB B012. 
 
-I'll walk through an example using the New York state legislature, starting with raw voting data and ending with cool graphs comparing the Senate to the Assembly and showing changes over time. I recommend bringing a laptop and following along.
+I'll walk through an example using the New York state legislature, starting with raw voting data and ending with fun graphs comparing the Senate to the Assembly and showing changes over time. I recommend bringing a laptop and following along.
 
 If you're following along, try to get these beforehand:
 - R, http://www.r-project.org/
