@@ -14,10 +14,10 @@ If you're following along, try to get these beforehand:
 ---
 
 Here are just a few examples of people using this data:  
-http://www.pewresearch.org/fact-tank/2014/06/12/polarized-politics-in-congress-began-in-the-1970s-and-has-been-getting-worse-ever-since/  
-https://xkcd.com/1127/  
-http://www.washingtonpost.com/blogs/monkey-cage/wp/2014/01/14/how-u-s-state-legislatures-are-polarized-and-getting-more-polarized-in-2-graphs/  
-https://voteviewblog.wordpress.com/  
+[The polarized Congress of today has its roots in the 1970s] (http://www.pewresearch.org/fact-tank/2014/06/12/polarized-politics-in-congress-began-in-the-1970s-and-has-been-getting-worse-ever-since/)  
+[xkcd: Congress](https://xkcd.com/1127/)  
+[How U.S. state legislatures are polarized and getting more polarized (in 2 graphs)](http://www.washingtonpost.com/blogs/monkey-cage/wp/2014/01/14/how-u-s-state-legislatures-are-polarized-and-getting-more-polarized-in-2-graphs/)  
+[Voteview Blog](https://voteviewblog.wordpress.com/)  
 
 
 I'll try to make the talk work well for people who haven't used R before. But if you haven't used R, and you want to try it out, this tutorial explains it very clearly:  
