@@ -9,7 +9,7 @@ If you're following along, try to get these beforehand:
 - RStudio, http://www.rstudio.com/products/rstudio/
 - this code, download it by clicking the "Download ZIP" button on the bottom of the sidebar on this page
 - the required R packages, install them by running the code in packages.R
-- data from the Sunlight Foundation, http://static.openstates.org/downloads/2015-03-01-ny-csv.zip
+- NY rollcall data from the Sunlight Foundation, http://static.openstates.org/downloads/2015-03-01-ny-csv.zip
 
 ---
 
