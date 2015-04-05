@@ -7,10 +7,11 @@ I'll walk through an example using the New York state legislature, starting with
 If you're following along, try to get these beforehand:
 - R, http://www.r-project.org/
 - RStudio, http://www.rstudio.com/products/rstudio/
-- this code, download it by clicking the "Download ZIP" button on the bottom right
+- this code, download it by clicking the "Download ZIP" button on the bottom of the sidebar on this page
 - the required R packages, install them by running the code in packages.R
 - data from the Sunlight Foundation, http://static.openstates.org/downloads/2015-03-01-ny-csv.zip
 
+---
 
 Here are just a few examples of people using this data:  
 http://www.pewresearch.org/fact-tank/2014/06/12/polarized-politics-in-congress-began-in-the-1970s-and-has-been-getting-worse-ever-since/  
