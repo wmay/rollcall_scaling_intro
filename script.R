@@ -1,6 +1,7 @@
 # analyze that voting data
+
 library(lubridate)
-library(pscl)
+library(pscl) # Political Science Computation Library
 
 
 chamber = "lower"
@@ -19,48 +20,32 @@ legs$party[legs$party == ""] = "Unknown"
 # I want dates!
 bill_votes$date = as.Date(bill_votes$date)
 
-rollcalls = bill_votes[bill_votes[, "vote_chamber"] == chamber &
-                         year(bill_votes[, "date"]) == year &
-                           bill_votes[, "motion"] == "Floor Vote", ]
+# find all the floor votes in the given chamber in the given year
+rollcalls = bill_votes[bill_votes$vote_chamber == chamber &
+                         year(bill_votes$date) == year &
+                           bill_votes$motion == "Floor Vote", ]
 
 # the relevant votes
-rel_votes = leg_votes[leg_votes[, "vote_id"] %in%
-    rollcalls[, "vote_id"], ]
-
-
-# fixing the rel_votes data:
-# "Lopez" is Peter Lopez
-rel_votes[rel_votes[, "name"] == "Lopez", "leg_id"] =
-  legs[legs[, "full_name"] == "Peter Lopez", "leg_id"]
-
-# "Mr Spkr" is Sheldon Silver
-rel_votes[rel_votes[, "name"] == "Mr Spkr", "leg_id"] =
-  legs[legs[, "full_name"] == "Sheldon Silver", "leg_id"]
-
+rel_votes = leg_votes[leg_votes$vote_id %in% rollcalls$vote_id &
+                        leg_votes$leg_id != "", ]
 
 # putting together the rollcall object
-leg_ids = unique(rel_votes[, "leg_id"])
+leg_ids = unique(rel_votes$leg_id)
 vote_matrix = matrix(nrow = length(leg_ids),
-    ncol = length(rollcalls[, 1]),
+    ncol = nrow(rollcalls),
     dimnames = list("Legislator ID" = leg_ids,
-        "Vote ID" = rollcalls[, "vote_id"]))
+        "Vote ID" = rollcalls$vote_id))
 
 for (row in 1:nrow(rel_votes)) {
-  vote_matrix[rel_votes[row, "leg_id"],
-              rel_votes[row, "vote_id"]] = rel_votes[row, "vote"]
+  vote_matrix[rel_votes[row, "leg_id"], rel_votes[row, "vote_id"]] =
+    rel_votes[row, "vote"]
 }
 
 # get the names
-names = vector(length = length(leg_ids))
-for (leg in 1:length(leg_ids)) {
-  names[leg] = legs[legs[, "leg_id"] == leg_ids[leg], "full_name"]
-}
+names = legs[match(leg_ids, legs$leg_id), "full_name"]
 
 # get the parties
-parties = vector(length = length(leg_ids))
-for (leg in 1:length(leg_ids)) {
-  parties[leg] = legs[legs[, "leg_id"] == leg_ids[leg], "party"]
-}
+parties = legs[match(leg_ids, legs$leg_id), "party"]
 parties = matrix(parties, length(parties), 1)
 colnames(parties) = "party"
 parties = as.data.frame(parties, stringsAsFactors = F)
@@ -79,51 +64,130 @@ rc = rollcall(vote_matrix, yea = "yes", nay = "no",
     source = "Sunlight Foundation")
 
 
-# save that data!
-save(rc, file = paste0(state, "_", year, ".RData"))
-
-# load that data!
-load(paste0(state, "_", year, ".RData"))
-
 
 
 # IDEAL
 
 # "ideal" function from "pscl" library
 
+# Assumes quadratic utility, uses MCMC (a Bayesian algorithm) to sort
+# legislators
 ideal_results = ideal(rc)
 plot(ideal_results)
+
 
 
 
 # W-NOMINATE
 library(wnominate)
 
-wnom_results = wnominate(rc, polarity = c("Peter Lopez", "Peter Lopez"))
+# Assumes Gaussian utility, uses a linear algebra algorithm to sort
+# legislators
+wnom_results = wnominate(rc, polarity = c("Brian M Kolb", "Brian M Kolb"))
 plot(wnom_results)
+plot.coords(wnom_results) # just the coordinates
+
 
 
 
 # alpha-NOMINATE
 library(anominate)
 
-# runs wnominate first, then uses MCMC
+# Gaussian utility, runs wnominate first, then uses MCMC
 anom_results = anominate(rc, polarity = 23)
+
+# save the results for later
+save(anom_results, file = "anom_results.RData")
+# load old results
+load("anom_results.RData")
+
 plot(anom_results)
 
-# some data from the MCMC analysis
+# Are the utilities Gaussian or quadratic?
+# 1 = Gaussian, 0 = quadratic
 densplot.anominate(anom_results)
-traceplot.anominate(anom_results)
 
 
-save(ideal_results, wnom_results, anom_results,
-     file = paste0(state, "_", year, "_results.RData"))
+
+
+
+
+# make writing the rollcall objects easier
+create_rc = function(legs, bill_votes, rel_votes) {
+
+  # putting together the vote matrix, to use for the rollcall object
+  leg_ids = unique(rel_votes[, "leg_id"])
+  vote_matrix = matrix(nrow = length(leg_ids),
+      ncol = length(rollcalls[, 1]),
+      dimnames = list("Legislator ID" = leg_ids,
+          "Vote ID" = rollcalls[, "vote_id"]))
+
+  # add votes to the vote matrix
+  for (row in 1:nrow(rel_votes)) {
+    vote_matrix[rel_votes[row, "leg_id"],
+                rel_votes[row, "vote_id"]] = rel_votes[row, "vote"]
+  }
+
+  # get the names
+  names = legs[match(leg_ids, legs$leg_id), "full_name"]
+
+  # get the parties
+  parties = legs[match(leg_ids, legs$leg_id), "party"]
+  parties = matrix(parties, length(parties), 1)
+  colnames(parties) = "party"
+  parties = as.data.frame(parties, stringsAsFactors = F)
+
+  # get the bill names
+  bill_names = rollcalls[, "bill_id"]
+  bill_names = matrix(rollcalls[, "bill_id"], length(rollcalls[, 1]), 1)
+  colnames(bill_names) = "Bill ID"
+  bill_names = as.data.frame(bill_names, stringsAsFactors = F)
+
+  # return the rollcall object
+  rollcall(vote_matrix, yea = "yes", nay = "no",
+           missing = c("other", NA),
+           legis.names = names, #vote.names = bill_names,
+           legis.data = parties, vote.data = bill_names,
+           source = "Sunlight Foundation")  
+}
+
+
+
+
 
 
 
 # Optimal Classification
 library(oc)
 
-oc_results = oc(rc, polarity = c("Peter Lopez"),
-    dims = 1)
+
+# all the floor votes in both chambers, in all years
+rollcalls = bill_votes[bill_votes[, "motion"] == "Floor Vote", ]
+
+# the relevant votes
+rel_votes = leg_votes[leg_votes$vote_id %in% rollcalls$vote_id &
+                      leg_votes$leg_id != "", ]
+
+# make the rollcall object
+oc_rc = create_rc(legs, bill_votes, rel_votes)
+
+# save that data!
+save(oc_rc, file = "oc_rc.RData")
+
+# load that data!
+load("oc_rc.RData")
+
+# Quadratic utility again, uses a linear algebra algorithm
+oc_results = oc(oc_rc, polarity = c("Brian M Kolb", "Brian M Kolb"))
 plot(oc_results)
+plot.OCcoords(oc_results)
+
+
+assemblymen = legs[legs$chamber == "lower", "full_name"]
+senators = legs[legs$chamber == "upper", "full_name"]
+
+plot(oc_results$legislators[assemblymen, "coord1D"],
+     oc_results$legislators[assemblymen, "coord2D"])
+
+plot(oc_results$legislators[senators, "coord1D"],
+     oc_results$legislators[senators, "coord2D"])
