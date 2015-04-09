@@ -173,21 +173,28 @@ oc_rc = create_rc(legs, bill_votes, rel_votes)
 
 # save that data!
 save(oc_rc, file = "oc_rc.RData")
-
-# load that data!
+# load the data
 load("oc_rc.RData")
 
-# Quadratic utility again, uses a linear algebra algorithm
+
+# Optimal Classification uses "nonmetric unfolding", meaning no
+# specified utility curve, though we assume it is symmetric and
+# single-peaked. Uses another linear algebra algorithm. Works well
+# with missing data, i.e., when comparing multiple chambers.
 oc_results = oc(oc_rc, polarity = c("Brian M Kolb", "Brian M Kolb"))
 plot(oc_results)
 plot.OCcoords(oc_results)
 
 
-assemblymen = legs[legs$chamber == "lower", "full_name"]
-senators = legs[legs$chamber == "upper", "full_name"]
 
-plot(oc_results$legislators[assemblymen, "coord1D"],
-     oc_results$legislators[assemblymen, "coord2D"])
 
-plot(oc_results$legislators[senators, "coord1D"],
-     oc_results$legislators[senators, "coord2D"])
+
+
+## assemblymen = legs[legs$chamber == "lower", "full_name"]
+## senators = legs[legs$chamber == "upper", "full_name"]
+
+## plot(oc_results$legislators[assemblymen, "coord1D"],
+##      oc_results$legislators[assemblymen, "coord2D"])
+
+## plot(oc_results$legislators[senators, "coord1D"],
+##      oc_results$legislators[senators, "coord2D"])
