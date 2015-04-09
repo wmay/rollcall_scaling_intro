@@ -18,7 +18,7 @@ If you're following along, try to get these beforehand:
 ---
 
 Here are just a few examples of people using rollcall scaling data:  
-[The polarized Congress of today has its roots in the 1970s] (http://www.pewresearch.org/fact-tank/2014/06/12/polarized-politics-in-congress-began-in-the-1970s-and-has-been-getting-worse-ever-since/)  
+[The polarized Congress of today has its roots in the 1970s (Pew Research)] (http://www.pewresearch.org/fact-tank/2014/06/12/polarized-politics-in-congress-began-in-the-1970s-and-has-been-getting-worse-ever-since/)  
 [xkcd: Congress](https://xkcd.com/1127/)  
 [How U.S. state legislatures are polarized and getting more polarized (in 2 graphs)](http://www.washingtonpost.com/blogs/monkey-cage/wp/2014/01/14/how-u-s-state-legislatures-are-polarized-and-getting-more-polarized-in-2-graphs/)  
 [Martin-Quinn Judicial Ideology Scores](http://mqscores.berkeley.edu/index.php)  
