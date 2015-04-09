@@ -1,4 +1,4 @@
-# analyze that voting data
+# analyzing rollcalls from the New York state legislature
 
 library(lubridate)
 library(pscl) # Political Science Computation Library
@@ -17,7 +17,7 @@ leg_votes = read.csv(paste0("ny_bill_legislator_votes.csv"),
 # clarify party status
 legs$party[legs$party == ""] = "Unknown"
 
-# I want dates!
+# convert text dates to date objects
 bill_votes$date = as.Date(bill_votes$date)
 
 # find all the floor votes in the given chamber in the given year
