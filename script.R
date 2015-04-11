@@ -49,8 +49,7 @@ colnames(parties) = "party"
 parties = as.data.frame(parties, stringsAsFactors = F)
 
 # get the bill names
-bill_names = rollcalls[, "bill_id"]
-bill_names = matrix(rollcalls[, "bill_id"], length(rollcalls[, 1]), 1)
+bill_names = matrix(rollcalls$bill_id, nrow(rollcalls), 1)
 colnames(bill_names) = "Bill ID"
 bill_names = as.data.frame(bill_names, stringsAsFactors = F)
 
@@ -111,14 +110,18 @@ densplot.anominate(anom_results)
 
 
 # make writing the rollcall objects easier
-create_rc = function(legs, bill_votes, rel_votes) {
+create_rc = function(legs, rollcalls, leg_votes) {
+
+  # the relevant votes
+  rel_votes = leg_votes[leg_votes$vote_id %in% rollcalls$vote_id &
+                          leg_votes$leg_id != "", ]
 
   # putting together the vote matrix, to use for the rollcall object
-  leg_ids = unique(rel_votes[, "leg_id"])
+  leg_ids = unique(rel_votes$leg_id)
   vote_matrix = matrix(nrow = length(leg_ids),
-      ncol = length(rollcalls[, 1]),
+      ncol = nrow(rollcalls),
       dimnames = list("Legislator ID" = leg_ids,
-          "Vote ID" = rollcalls[, "vote_id"]))
+          "Vote ID" = rollcalls$vote_id))
 
   # the row and column names for each of the votes
   indices = as.matrix(rel_votes[, c("leg_id", "vote_id")])
@@ -135,8 +138,8 @@ create_rc = function(legs, bill_votes, rel_votes) {
   parties = as.data.frame(parties, stringsAsFactors = F)
 
   # get the bill names
-  bill_names = rollcalls[, "bill_id"]
-  bill_names = matrix(rollcalls[, "bill_id"], length(rollcalls[, 1]), 1)
+  bill_names = rollcalls$bill_id
+  bill_names = matrix(rollcalls$bill_id, nrow(rollcalls), 1)
   colnames(bill_names) = "Bill ID"
   bill_names = as.data.frame(bill_names, stringsAsFactors = F)
 
@@ -161,12 +164,8 @@ library(oc)
 # all the floor votes in both chambers, in all years
 rollcalls = bill_votes[bill_votes[, "motion"] == "Floor Vote", ]
 
-# the relevant votes
-rel_votes = leg_votes[leg_votes$vote_id %in% rollcalls$vote_id &
-                      leg_votes$leg_id != "", ]
-
 # make the rollcall object
-oc_rc = create_rc(legs, bill_votes, rel_votes)
+oc_rc = create_rc(legs, rollcalls, leg_votes)
 
 
 # Optimal Classification uses "nonmetric unfolding", meaning no
