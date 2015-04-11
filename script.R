@@ -7,11 +7,9 @@ library(pscl) # Political Science Computation Library
 chamber = "lower"
 year = 2014
 
-legs = read.csv(paste0("ny_legislators.csv"),
-    stringsAsFactors = F)
-bill_votes = read.csv(paste0("ny_bill_votes.csv"),
-    stringsAsFactors = F)
-leg_votes = read.csv(paste0("ny_bill_legislator_votes.csv"),
+legs = read.csv("ny_legislators.csv", stringsAsFactors = F)
+bill_votes = read.csv("ny_bill_votes.csv", stringsAsFactors = F)
+leg_votes = read.csv("ny_bill_legislator_votes.csv",
     stringsAsFactors = F)
 
 # clarify party status
@@ -36,10 +34,10 @@ vote_matrix = matrix(nrow = length(leg_ids),
     dimnames = list("Legislator ID" = leg_ids,
         "Vote ID" = rollcalls$vote_id))
 
-for (row in 1:nrow(rel_votes)) {
-  vote_matrix[rel_votes[row, "leg_id"], rel_votes[row, "vote_id"]] =
-    rel_votes[row, "vote"]
-}
+# the row and column names for each of the votes
+indices = as.matrix(rel_votes[, c("leg_id", "vote_id")])
+# add all the votes to the matrix
+vote_matrix[indices] = rel_votes$vote
 
 # get the names
 names = legs[match(leg_ids, legs$leg_id), "full_name"]
@@ -56,10 +54,9 @@ bill_names = matrix(rollcalls[, "bill_id"], length(rollcalls[, 1]), 1)
 colnames(bill_names) = "Bill ID"
 bill_names = as.data.frame(bill_names, stringsAsFactors = F)
 
-# make that rollcall object
+# create the rollcall object
 rc = rollcall(vote_matrix, yea = "yes", nay = "no",
-    missing = c("other", NA),
-    legis.names = names, #vote.names = bill_names,
+    missing = c("other", NA), legis.names = names,
     legis.data = parties, vote.data = bill_names,
     source = "Sunlight Foundation")
 
@@ -98,6 +95,7 @@ anom_results = anominate(rc, polarity = 23)
 
 # save the results for later
 save(anom_results, file = "anom_results.RData")
+
 # load old results
 load("anom_results.RData")
 
@@ -122,11 +120,10 @@ create_rc = function(legs, bill_votes, rel_votes) {
       dimnames = list("Legislator ID" = leg_ids,
           "Vote ID" = rollcalls[, "vote_id"]))
 
-  # add votes to the vote matrix
-  for (row in 1:nrow(rel_votes)) {
-    vote_matrix[rel_votes[row, "leg_id"],
-                rel_votes[row, "vote_id"]] = rel_votes[row, "vote"]
-  }
+  # the row and column names for each of the votes
+  indices = as.matrix(rel_votes[, c("leg_id", "vote_id")])
+  # add all the votes to the matrix
+  vote_matrix[indices] = rel_votes$vote
 
   # get the names
   names = legs[match(leg_ids, legs$leg_id), "full_name"]
@@ -171,11 +168,6 @@ rel_votes = leg_votes[leg_votes$vote_id %in% rollcalls$vote_id &
 # make the rollcall object
 oc_rc = create_rc(legs, bill_votes, rel_votes)
 
-# save that data!
-save(oc_rc, file = "oc_rc.RData")
-# load the data
-load("oc_rc.RData")
-
 
 # Optimal Classification uses "nonmetric unfolding", meaning no
 # specified utility curve, though we assume it is symmetric and
@@ -185,16 +177,29 @@ oc_results = oc(oc_rc, polarity = c("Brian M Kolb", "Brian M Kolb"))
 plot(oc_results)
 plot.OCcoords(oc_results)
 
+# try plotting the senate and assembly separately
+plot(oc_results$legislators[assemblymen, "coord1D"],
+     oc_results$legislators[assemblymen, "coord2D"])
+
+plot(oc_results$legislators[senators, "coord1D"],
+     oc_results$legislators[senators, "coord2D"])
 
 
 
 
+# how many legislators served in both chambers?
+assembly_rc_ids = unique(
+    bill_votes[bill_votes$vote_chamber == "lower", "vote_id"])
+assembly_ids = unique(
+    leg_votes[leg_votes$vote_id %in% assembly_rc_ids, "leg_id"])
+assemblymen = legs[legs$leg_id %in% assembly_ids, "full_name"]
 
-## assemblymen = legs[legs$chamber == "lower", "full_name"]
-## senators = legs[legs$chamber == "upper", "full_name"]
+senate_rc_ids = unique(
+    bill_votes[bill_votes$vote_chamber == "upper", "vote_id"])
+senate_ids = unique(
+    leg_votes[leg_votes$vote_id %in% senate_rc_ids, "leg_id"])
+senators = legs[legs$leg_id %in% senate_ids, "full_name"]
 
-## plot(oc_results$legislators[assemblymen, "coord1D"],
-##      oc_results$legislators[assemblymen, "coord2D"])
 
-## plot(oc_results$legislators[senators, "coord1D"],
-##      oc_results$legislators[senators, "coord2D"])
+sum(senators %in% assemblymen)
+senators[senators %in% assemblymen]
