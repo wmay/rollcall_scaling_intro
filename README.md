@@ -27,3 +27,9 @@ Here are just a few examples of people using rollcall scaling data:
 
 I'll try to make the talk work well for people who haven't used R before. But if you haven't used R, and you want to try it out, this tutorial explains it very clearly:  
 http://www.r-tutor.com/r-introduction
+
+---
+
+Sponsored by these wonderful groups:  
+[UAlbany ASIS&T](http://ualbanyasist.com/)  
+[Albany R Users Group](http://www.meetup.com/Albany-R-Users-Group/)
