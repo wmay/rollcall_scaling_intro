@@ -1,6 +1,7 @@
 # analyzing rollcalls from the New York state legislature
 
 library(lubridate)
+library(reshape2)
 library(pscl) # Political Science Computation Library
 
 
@@ -27,34 +28,23 @@ rollcalls = bill_votes[bill_votes$vote_chamber == chamber &
 rel_votes = leg_votes[leg_votes$vote_id %in% rollcalls$vote_id &
                         leg_votes$leg_id != "", ]
 
-# putting together the rollcall object
-leg_ids = unique(rel_votes$leg_id)
-vote_matrix = matrix(nrow = length(leg_ids),
-    ncol = nrow(rollcalls),
-    dimnames = list("Legislator ID" = leg_ids,
-        "Vote ID" = rollcalls$vote_id))
-
-# the row and column names for each of the votes
-indices = as.matrix(rel_votes[, c("leg_id", "vote_id")])
-# add all the votes to the matrix
-vote_matrix[indices] = rel_votes$vote
+# transform rel_votes from long to wide format
+vote_matrix = dcast(rel_votes, leg_id ~ vote_id, value.var = "vote")
 
 # get the names
+leg_ids = vote_matrix[, 1]
 names = legs[match(leg_ids, legs$leg_id), "full_name"]
 
 # get the parties
-parties = legs[match(leg_ids, legs$leg_id), "party"]
-parties = matrix(parties, length(parties), 1)
-colnames(parties) = "party"
-parties = as.data.frame(parties, stringsAsFactors = F)
+party = legs[match(leg_ids, legs$leg_id), "party"]
+party = as.data.frame(party, stringsAsFactors = F)
 
 # get the bill names
-bill_names = matrix(rollcalls$bill_id, nrow(rollcalls), 1)
-colnames(bill_names) = "Bill ID"
-bill_names = as.data.frame(bill_names, stringsAsFactors = F)
+bill_names = data.frame("Bill ID" = rollcalls$bill_id,
+    stringsAsFactors = F)
 
 # create the rollcall object
-rc = rollcall(vote_matrix, yea = "yes", nay = "no",
+rc = rollcall(vote_matrix[, -1], yea = "yes", nay = "no",
     missing = c("other", NA), legis.names = names,
     legis.data = parties, vote.data = bill_names,
     source = "Sunlight Foundation")
@@ -116,32 +106,20 @@ create_rc = function(legs, rollcalls, leg_votes) {
   rel_votes = leg_votes[leg_votes$vote_id %in% rollcalls$vote_id &
                           leg_votes$leg_id != "", ]
 
-  # putting together the vote matrix, to use for the rollcall object
-  leg_ids = unique(rel_votes$leg_id)
-  vote_matrix = matrix(nrow = length(leg_ids),
-      ncol = nrow(rollcalls),
-      dimnames = list("Legislator ID" = leg_ids,
-          "Vote ID" = rollcalls$vote_id))
-
-  # the row and column names for each of the votes
-  indices = as.matrix(rel_votes[, c("leg_id", "vote_id")])
-  # add all the votes to the matrix
-  vote_matrix[indices] = rel_votes$vote
+  # transform rel_votes from long to wide format
+  vote_matrix = dcast(rel_votes, leg_id ~ vote_id, value.var = "vote")
 
   # get the names
+  leg_ids = vote_matrix[, 1]
   names = legs[match(leg_ids, legs$leg_id), "full_name"]
 
   # get the parties
-  parties = legs[match(leg_ids, legs$leg_id), "party"]
-  parties = matrix(parties, length(parties), 1)
-  colnames(parties) = "party"
-  parties = as.data.frame(parties, stringsAsFactors = F)
+  party = legs[match(leg_ids, legs$leg_id), "party"]
+  party = as.data.frame(party, stringsAsFactors = F)
 
   # get the bill names
-  bill_names = rollcalls$bill_id
-  bill_names = matrix(rollcalls$bill_id, nrow(rollcalls), 1)
-  colnames(bill_names) = "Bill ID"
-  bill_names = as.data.frame(bill_names, stringsAsFactors = F)
+  bill_names = data.frame("Bill ID" = rollcalls$bill_id,
+      stringsAsFactors = F)
 
   # return the rollcall object
   rollcall(vote_matrix, yea = "yes", nay = "no",

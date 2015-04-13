@@ -1,6 +1,7 @@
 # install the relevant packages
 
 rollcall_packages = c("lubridate", # date utilities
+    "reshape2", # reshape data frames
     "pscl", # Political Science Computation Laboratory
     "wnominate", # Weighted-NOMINATE
     "anominate", # alpha-NOMINATE
