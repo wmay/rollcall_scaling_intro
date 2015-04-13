@@ -46,7 +46,7 @@ bill_names = data.frame("Bill ID" = rollcalls$bill_id,
 # create the rollcall object
 rc = rollcall(vote_matrix[, -1], yea = "yes", nay = "no",
     missing = c("other", NA), legis.names = names,
-    legis.data = parties, vote.data = bill_names,
+    legis.data = party, vote.data = bill_names,
     source = "Sunlight Foundation")
 
 
