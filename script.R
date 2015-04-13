@@ -36,17 +36,17 @@ leg_ids = vote_matrix[, 1]
 names = legs[match(leg_ids, legs$leg_id), "full_name"]
 
 # get the parties
-party = legs[match(leg_ids, legs$leg_id), "party"]
-party = as.data.frame(party, stringsAsFactors = F)
+parties = legs[match(leg_ids, legs$leg_id), "party"]
+parties = data.frame("party" = parties, stringsAsFactors = F)
 
 # get the bill names
-bill_names = data.frame("Bill ID" = rollcalls$bill_id,
+vote_ids = data.frame("Vote ID" = colnames(vote_matrix[, -1]),
     stringsAsFactors = F)
 
 # create the rollcall object
 rc = rollcall(vote_matrix[, -1], yea = "yes", nay = "no",
-    missing = c("other", NA), legis.names = names,
-    legis.data = party, vote.data = bill_names,
+    missing = "other", notInLegis = NA, legis.names = names,
+    legis.data = parties, vote.data = vote_ids,
     source = "Sunlight Foundation")
 
 
@@ -80,7 +80,7 @@ plot.coords(wnom_results) # just the coordinates
 library(anominate)
 
 # Gaussian utility, runs wnominate first, then uses MCMC
-anom_results = anominate(rc, polarity = 23)
+anom_results = anominate(rc, polarity = 53)
 
 # save the results for later
 save(anom_results, file = "anom_results.RData")
@@ -114,19 +114,18 @@ create_rc = function(legs, rollcalls, leg_votes) {
   names = legs[match(leg_ids, legs$leg_id), "full_name"]
 
   # get the parties
-  party = legs[match(leg_ids, legs$leg_id), "party"]
-  party = as.data.frame(party, stringsAsFactors = F)
+  parties = legs[match(leg_ids, legs$leg_id), "party"]
+  parties = data.frame("party" = parties, stringsAsFactors = F)
 
   # get the bill names
-  bill_names = data.frame("Bill ID" = rollcalls$bill_id,
+  vote_ids = data.frame("Vote ID" = colnames(vote_matrix[, -1]),
       stringsAsFactors = F)
 
-  # return the rollcall object
-  rollcall(vote_matrix, yea = "yes", nay = "no",
-           missing = c("other", NA),
-           legis.names = names, #vote.names = bill_names,
-           legis.data = parties, vote.data = bill_names,
-           source = "Sunlight Foundation")  
+  # create the rollcall object
+  rc = rollcall(vote_matrix[, -1], yea = "yes", nay = "no",
+      missing = "other", notInLegis = NA, legis.names = names,
+      legis.data = parties, vote.data = vote_ids,
+      source = "Sunlight Foundation")
 }
 
 
