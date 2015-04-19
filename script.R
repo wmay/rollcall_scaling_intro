@@ -153,17 +153,8 @@ oc_results = oc(oc_rc, polarity = c("Brian M Kolb", "Brian M Kolb"))
 plot(oc_results)
 plot.OCcoords(oc_results)
 
+
 # try plotting the senate and assembly separately
-plot(oc_results$legislators[assemblymen, "coord1D"],
-     oc_results$legislators[assemblymen, "coord2D"])
-
-plot(oc_results$legislators[senators, "coord1D"],
-     oc_results$legislators[senators, "coord2D"])
-
-
-
-
-# how many legislators served in both chambers?
 assembly_rc_ids = unique(
     bill_votes[bill_votes$vote_chamber == "lower", "vote_id"])
 assembly_ids = unique(
@@ -176,6 +167,14 @@ senate_ids = unique(
     leg_votes[leg_votes$vote_id %in% senate_rc_ids, "leg_id"])
 senators = legs[legs$leg_id %in% senate_ids, "full_name"]
 
+plot(oc_results$legislators[assemblymen, "coord1D"],
+     oc_results$legislators[assemblymen, "coord2D"])
 
+plot(oc_results$legislators[senators, "coord1D"],
+     oc_results$legislators[senators, "coord2D"])
+
+
+
+# how many legislators served in both chambers?
 sum(senators %in% assemblymen)
 senators[senators %in% assemblymen]
