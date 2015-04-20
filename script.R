@@ -71,6 +71,10 @@ library(wnominate)
 # legislators
 wnom_results = wnominate(rc, polarity = c("Brian M Kolb", "Brian M Kolb"))
 plot(wnom_results)
+
+par(mfrow=c(1,1)) # fix graphing parameters, if needed
+suppressWarnings(T) # stop pesky warning messages
+
 plot.coords(wnom_results) # just the coordinates
 
 # looking closely at A2597, the DREAM Act
