@@ -73,6 +73,16 @@ wnom_results = wnominate(rc, polarity = c("Brian M Kolb", "Brian M Kolb"))
 plot(wnom_results)
 plot.coords(wnom_results) # just the coordinates
 
+# looking closely at A2597, the DREAM Act
+rollcalls[rollcalls[, "bill_id"] == "A 2597", ]
+which(rc$vote.data[, "Vote.ID"] == "NYV00019838")
+plot.coords(wnom_results, cutline = 211)
+wnom_results$rollcalls[211, ]
+# The midpoint is the point between the estimated yea and nay
+# locations. The spread is the distance from the midpoint to either
+# the yea or nay point. If you were to draw a line connecting the yea
+# and nay locations, the cutline would intersect with it at the
+# midpoint, at a 90 degree angle.
 
 
 
@@ -139,7 +149,7 @@ library(oc)
 
 
 # all the floor votes in both chambers, in all years
-rollcalls = bill_votes[bill_votes[, "motion"] == "Floor Vote", ]
+rollcalls = bill_votes[bill_votes$motion == "Floor Vote", ]
 
 # make the rollcall object
 oc_rc = create_rc(legs, rollcalls, leg_votes)
@@ -178,3 +188,53 @@ plot(oc_results$legislators[senators, "coord1D"],
 # how many legislators served in both chambers?
 sum(senators %in% assemblymen)
 senators[senators %in% assemblymen]
+
+
+
+# just the Assembly then
+
+# all the floor votes in the Assembly, in all years
+rollcalls = bill_votes[bill_votes$vote_chamber == chamber &
+                         bill_votes$motion == "Floor Vote", ]
+
+# make the rollcall object
+oc_rc = create_rc(legs, rollcalls, leg_votes)
+
+oc_results = oc(oc_rc, polarity = c("Brian M Kolb", "Brian M Kolb"))
+plot(oc_results)
+plot.OCcoords(oc_results)
+
+dems = list()
+reps = list()
+dem_means = vector()
+rep_means = vector()
+x = 1
+for (year in 2011:2015) {
+  rc_ids = unique(rollcalls[year(rollcalls$date) == year, "vote_id"])
+  assembly_ids = unique(leg_votes[leg_votes$vote_id %in% rc_ids, "leg_id"])
+  assemblymen = legs[legs$leg_id %in% assembly_ids, ]
+  dem_names = assemblymen[assemblymen$party == "Democratic", "full_name"]
+  rep_names = assemblymen[assemblymen$party == "Republican", "full_name"]
+  dems[[year]] = oc_results$legislators[dem_names, "coord1D"]
+  reps[[year]] = oc_results$legislators[rep_names, "coord1D"]
+  # get rid of the NA's
+  dems[[year]] = dems[[year]][!is.na(dems[[year]])]
+  reps[[year]] = reps[[year]][!is.na(reps[[year]])]
+  dem_means[x] = mean(dems[[year]], na.rm = T)
+  rep_means[x] = mean(reps[[year]], na.rm = T)
+  x = x + 1
+}
+
+# plot the distributions
+library(vioplot)
+vioplot(dems[[2011]], dems[[2012]], dems[[2013]], dems[[2014]],
+        dems[[2015]],
+        names=c("2011", "2012", "2013", "2014", "2015"),
+        ylim = c(-1, 1), col="blue")
+vioplot(reps[[2011]], reps[[2012]], reps[[2013]], reps[[2014]],
+        reps[[2015]],
+        ylim = c(-1, 1), col="red", add = T)
+
+# plot the means
+plot(2011:2015, dem_means, ylim = c(-1, 1), col = "blue", type = "b")
+points(2011:2015, rep_means, col = "red", type = "b")

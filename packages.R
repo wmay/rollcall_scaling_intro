@@ -6,6 +6,7 @@ rollcall_packages = c("lubridate", # date utilities
     "wnominate", # Weighted-NOMINATE
     "anominate", # alpha-NOMINATE
     "oc", # Optimal Classification
+    "vioplot", # violin plots
     "devtools" # to install a package from Github
                       )
 
